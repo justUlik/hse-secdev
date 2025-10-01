@@ -55,3 +55,92 @@ def get_item(item_id: int):
         if it["id"] == item_id:
             return it
     raise ApiError(code="not_found", message="item not found", status=404)
+
+
+# In-memory recipes DB
+_RECIPES_DB = []
+
+
+# Helper for recipe validation
+def _validate_recipe(data):
+    title = data.get("title", "")
+    description = data.get("description", "")
+    if not isinstance(title, str) or not title.strip():
+        raise ApiError(
+            code="validation_error", message="Title must not be empty", status=422
+        )
+    if not isinstance(description, str) or len(description) > 500:
+        raise ApiError(
+            code="validation_error",
+            message="Description must be less than 500 chars",
+            status=422,
+        )
+
+
+# 1. GET /recipes - list all recipes
+@app.get("/recipes")
+def list_recipes():
+    return _RECIPES_DB
+
+
+# 2. GET /recipes/{recipe_id} - get one recipe by id
+@app.get("/recipes/{recipe_id}")
+def get_recipe(recipe_id: int):
+    for recipe in _RECIPES_DB:
+        if recipe["id"] == recipe_id:
+            return recipe
+    raise ApiError(code="not_found", message="recipe not found", status=404)
+
+
+# 3. POST /recipes - create recipe
+@app.post("/recipes")
+def create_recipe(recipe: dict):
+    _validate_recipe(recipe)
+    ingredients = recipe.get("ingredients", [])
+    if not isinstance(ingredients, list):
+        raise ApiError(
+            code="validation_error", message="Ingredients must be a list", status=422
+        )
+    new_id = 1 + (_RECIPES_DB[-1]["id"] if _RECIPES_DB else 0)
+    new_recipe = {
+        "id": new_id,
+        "title": recipe["title"],
+        "description": recipe["description"],
+        "ingredients": ingredients,
+        "instructions": recipe.get("instructions", ""),
+    }
+    _RECIPES_DB.append(new_recipe)
+    return new_recipe
+
+
+# 4. PUT /recipes/{recipe_id} - update recipe
+@app.put("/recipes/{recipe_id}")
+def update_recipe(recipe_id: int, recipe: dict):
+    _validate_recipe(recipe)
+    ingredients = recipe.get("ingredients", [])
+    if not isinstance(ingredients, list):
+        raise ApiError(
+            code="validation_error", message="Ingredients must be a list", status=422
+        )
+    for idx, r in enumerate(_RECIPES_DB):
+        if r["id"] == recipe_id:
+            updated = {
+                "id": recipe_id,
+                "title": recipe["title"],
+                "description": recipe["description"],
+                "ingredients": ingredients,
+                "instructions": recipe.get("instructions", ""),
+            }
+            _RECIPES_DB[idx] = updated
+            return updated
+    raise ApiError(code="not_found", message="recipe not found", status=404)
+
+
+# 5. DELETE /recipes/{recipe_id} - delete recipe
+@app.delete("/recipes/{recipe_id}")
+def delete_recipe(recipe_id: int):
+    for idx, r in enumerate(_RECIPES_DB):
+        if r["id"] == recipe_id:
+            del _RECIPES_DB[idx]
+            return {"message": "Recipe deleted"}
+    raise ApiError(code="not_found", message="recipe not found", status=404)

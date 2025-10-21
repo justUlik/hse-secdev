@@ -1,7 +1,10 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 app = FastAPI(title="SecDev Course App", version="0.1.0")
+limiter = Limiter(key_func=get_remote_address)
 
 
 class ApiError(Exception):
@@ -94,7 +97,8 @@ def get_recipe(recipe_id: int):
 
 # 3. POST /recipes - create recipe
 @app.post("/recipes")
-def create_recipe(recipe: dict):
+@limiter.limit("30/minute")
+def create_recipe(request: Request, recipe: dict):
     _validate_recipe(recipe)
     ingredients = recipe.get("ingredients", [])
     if not isinstance(ingredients, list):

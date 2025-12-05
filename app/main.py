@@ -224,7 +224,7 @@ def update_recipe(recipe_id: int, recipe: dict, db: Session = Depends(get_db)):
     db_recipe.title = recipe["title"]
     db_recipe.description = recipe["description"]
     db_recipe.ingredients = "||".join(recipe["ingredients"])  # type: ignore[assignment]
-    db_recipe.instructions = recipe.get("instructions", "") or ""   # type: ignore[assignment]
+    db_recipe.instructions = recipe.get("instructions", "") or ""  # type: ignore[assignment]
 
     db.commit()
     db.refresh(db_recipe)

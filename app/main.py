@@ -1,8 +1,10 @@
 import logging
 import os
 
+
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+from typing import Dict, List, Any
 from sqlalchemy.orm import Session
 
 from app.database import Base, SessionLocal, engine
@@ -106,7 +108,7 @@ async def log_and_secure(request: Request, call_next):
 # --------------------- DEMO /items API (как было) ----------------------
 
 
-_DB = {"items": []}
+_DB: Dict[str, List[Dict[str, Any]]] = {"items": []}
 
 
 @app.post("/items")
@@ -222,8 +224,8 @@ def update_recipe(recipe_id: int, recipe: dict, db: Session = Depends(get_db)):
 
     db_recipe.title = recipe["title"]
     db_recipe.description = recipe["description"]
-    db_recipe.ingredients = "||".join(recipe["ingredients"])
-    db_recipe.instructions = recipe.get("instructions", "") or ""
+    db_recipe.ingredients = "||".join(recipe["ingredients"])  # type: ignore[assignment]
+    db_recipe.instructions = recipe.get("instructions", "") or ""   # type: ignore[assignment]
 
     db.commit()
     db.refresh(db_recipe)

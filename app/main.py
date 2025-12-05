@@ -1,10 +1,8 @@
 import logging
 import os
 
-
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-from typing import Dict, List, Any
 from sqlalchemy.orm import Session
 
 from app.database import Base, SessionLocal, engine

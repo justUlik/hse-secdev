@@ -1,0 +1,26 @@
+2025-12-05 22:19:13,175 INFO POST /recipes -> 200
+2025-12-05 22:35:32,256 WARNING API error: code=not_found path=/items/999
+2025-12-05 22:35:32,256 INFO GET /items/999 -> 404
+2025-12-05 22:35:32,256 INFO HTTP Request: GET http://testserver/items/999 "HTTP/1.1 404 Not Found"
+2025-12-05 22:35:32,261 WARNING API error: code=validation_error path=/items
+2025-12-05 22:35:32,261 INFO POST /items -> 422
+2025-12-05 22:35:32,261 INFO HTTP Request: POST http://testserver/items?name= "HTTP/1.1 422 Unprocessable Entity"
+2025-12-05 22:35:32,264 INFO GET /health -> 200
+2025-12-05 22:35:32,265 INFO HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2025-12-05 22:36:34,789 WARNING API error: code=not_found path=/items/999
+2025-12-05 22:36:34,789 INFO request method=GET path=/items/999 status=404
+2025-12-05 22:36:34,790 INFO HTTP Request: GET http://testserver/items/999 "HTTP/1.1 404 Not Found"
+2025-12-05 22:36:34,793 WARNING API error: code=validation_error path=/items
+2025-12-05 22:36:34,793 INFO request method=POST path=/items status=422
+2025-12-05 22:36:34,793 INFO HTTP Request: POST http://testserver/items?name= "HTTP/1.1 422 Unprocessable Entity"
+2025-12-05 22:36:34,796 INFO request method=GET path=/health status=200
+2025-12-05 22:36:34,796 INFO HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2025-12-05 22:42:59,595 INFO request method=POST path=/recipes status=200
+2025-12-05 22:43:35,367 WARNING API error: code=not_found path=/items/999
+2025-12-05 22:43:35,367 INFO request method=GET path=/items/999 status=404
+2025-12-05 22:43:35,368 INFO HTTP Request: GET http://testserver/items/999 "HTTP/1.1 404 Not Found"
+2025-12-05 22:43:35,371 WARNING API error: code=validation_error path=/items
+2025-12-05 22:43:35,371 INFO request method=POST path=/items status=422
+2025-12-05 22:43:35,372 INFO HTTP Request: POST http://testserver/items?name= "HTTP/1.1 422 Unprocessable Entity"
+2025-12-05 22:43:35,375 INFO request method=GET path=/health status=200
+2025-12-05 22:43:35,375 INFO HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"

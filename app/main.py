@@ -1,5 +1,9 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
+from app.database import Base, engine, SessionLocal
+from app.models import Recipe
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="SecDev Course App", version="0.1.0")
 

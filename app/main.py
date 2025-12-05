@@ -1,5 +1,17 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
+from app.database import Base, engine, SessionLocal
+from app.models import Recipe
+from sqlalchemy.orm import Session
+
+Base.metadata.create_all(bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 app = FastAPI(title="SecDev Course App", version="0.1.0")
 
@@ -79,68 +91,110 @@ def _validate_recipe(data):
 
 # 1. GET /recipes - list all recipes
 @app.get("/recipes")
-def list_recipes():
-    return _RECIPES_DB
+def list_recipes(db: Session = Depends(get_db)):
+    recipes = db.query(Recipe).all()
+    return [
+        {
+            "id": r.id,
+            "title": r.title,
+            "description": r.description,
+            "ingredients": r.ingredients.split("||"),
+            "instructions": r.instructions,
+        }
+        for r in recipes
+    ]
 
 
 # 2. GET /recipes/{recipe_id} - get one recipe by id
 @app.get("/recipes/{recipe_id}")
-def get_recipe(recipe_id: int):
-    for recipe in _RECIPES_DB:
-        if recipe["id"] == recipe_id:
-            return recipe
-    raise ApiError(code="not_found", message="recipe not found", status=404)
+def get_recipe(recipe_id: int, db: Session = Depends(get_db)):
+    recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+    if not recipe:
+        raise ApiError(code="not_found", message="recipe not found", status=404)
+
+    return {
+        "id": recipe.id,
+        "title": recipe.title,
+        "description": recipe.description,
+        "ingredients": recipe.ingredients.split("||"),
+        "instructions": recipe.instructions or "",
+    }
 
 
 # 3. POST /recipes - create recipe
 @app.post("/recipes")
-def create_recipe(recipe: dict):
+def create_recipe(recipe: dict, db: Session = Depends(get_db)):
     _validate_recipe(recipe)
+
     ingredients = recipe.get("ingredients", [])
     if not isinstance(ingredients, list):
         raise ApiError(
-            code="validation_error", message="Ingredients must be a list", status=422
+            code="validation_error",
+            message="Ingredients must be a list",
+            status=422,
         )
-    new_id = 1 + (_RECIPES_DB[-1]["id"] if _RECIPES_DB else 0)
-    new_recipe = {
-        "id": new_id,
-        "title": recipe["title"],
-        "description": recipe["description"],
+
+    db_recipe = Recipe(
+        title=recipe["title"],
+        description=recipe["description"],
+        ingredients="||".join(ingredients),
+        instructions=recipe.get("instructions", "") or "",
+    )
+    db.add(db_recipe)
+    db.commit()
+    db.refresh(db_recipe)
+
+    return {
+        "id": db_recipe.id,
+        "title": db_recipe.title,
+        "description": db_recipe.description,
         "ingredients": ingredients,
-        "instructions": recipe.get("instructions", ""),
+        "instructions": db_recipe.instructions,
     }
-    _RECIPES_DB.append(new_recipe)
-    return new_recipe
 
 
 # 4. PUT /recipes/{recipe_id} - update recipe
 @app.put("/recipes/{recipe_id}")
-def update_recipe(recipe_id: int, recipe: dict):
+def update_recipe(recipe_id: int, recipe: dict, db: Session = Depends(get_db)):
     _validate_recipe(recipe)
+
     ingredients = recipe.get("ingredients", [])
     if not isinstance(ingredients, list):
         raise ApiError(
-            code="validation_error", message="Ingredients must be a list", status=422
+            code="validation_error",
+            message="Ingredients must be a list",
+            status=422,
         )
-    for idx, r in enumerate(_RECIPES_DB):
-        if r["id"] == recipe_id:
-            updated = {
-                "id": recipe_id,
-                "title": recipe["title"],
-                "description": recipe["description"],
-                "ingredients": ingredients,
-                "instructions": recipe.get("instructions", ""),
-            }
-            _RECIPES_DB[idx] = updated
-            return updated
-    raise ApiError(code="not_found", message="recipe not found", status=404)
+
+    db_recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+    if not db_recipe:
+        raise ApiError(code="not_found", message="recipe not found", status=404)
+
+    db_recipe.title = recipe["title"]
+    db_recipe.description = recipe["description"]
+    db_recipe.ingredients = "||".join(ingredients)
+    db_recipe.instructions = recipe.get("instructions", "") or ""
+
+    db.commit()
+    db.refresh(db_recipe)
+
+    return {
+        "id": db_recipe.id,
+        "title": db_recipe.title,
+        "description": db_recipe.description,
+        "ingredients": ingredients,
+        "instructions": db_recipe.instructions,
+    }
 
 
 # 5. DELETE /recipes/{recipe_id} - delete recipe
 @app.delete("/recipes/{recipe_id}")
-def delete_recipe(recipe_id: int):
-    for idx, r in enumerate(_RECIPES_DB):
-        if r["id"] == recipe_id:
-            del _RECIPES_DB[idx]
-            return {"message": "Recipe deleted"}
-    raise ApiError(code="not_found", message="recipe not found", status=404)
+def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
+    db_recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+    if not db_recipe:
+        raise ApiError(code="not_found", message="recipe not found", status=404)
+
+    db.delete(db_recipe)
+    db.commit()
+
+    return {"message": "Recipe deleted"}

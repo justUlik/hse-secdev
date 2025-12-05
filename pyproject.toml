@@ -5,7 +5,7 @@ exclude = ["venv", ".venv", "build", "dist"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "S"]
-ignore = ["S101", "B008"] 
+ignore = ["S101", "B008"]
 
 [tool.black]
 line-length = 100
@@ -22,4 +22,4 @@ strict = false
 warn_unused_ignores = true
 
 [tool.bandit]
-skips = ["B101"] 
+skips = ["B101"]

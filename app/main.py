@@ -1,5 +1,6 @@
 import logging
 import os
+from logging import Handler
 from typing import Any, Dict, List
 
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -23,7 +24,7 @@ def get_db():
         db.close()
 
 
-# --------------------- FastAPI app ----------------------
+# --------------------- FastAPI app ---------------------
 
 
 app = FastAPI(title="SecDev Course App", version="0.1.0")
@@ -31,11 +32,9 @@ app = FastAPI(title="SecDev Course App", version="0.1.0")
 # --------------------- Logs ----------------------
 
 
-# --------------------- Logs ----------------------
-
 LOG_DIR = os.getenv("APP_LOG_DIR", "logs")
 
-handlers = [logging.StreamHandler()]
+handlers: List[Handler] = [logging.StreamHandler()]
 
 try:
     os.makedirs(LOG_DIR, exist_ok=True)

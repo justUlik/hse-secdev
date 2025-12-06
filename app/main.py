@@ -31,7 +31,7 @@ app = FastAPI(title="SecDev Course App", version="0.1.0")
 # --------------------- Logs ----------------------
 
 
-LOG_DIR = os.getenv("APP_LOG_DIR", "logs")
+LOG_DIR = os.getenv("APP_LOG_DIR", "/app/logs")
 os.makedirs(LOG_DIR, exist_ok=True)
 
 for handler in logging.root.handlers[:]:

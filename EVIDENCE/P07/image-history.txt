@@ -1,0 +1,27 @@
+IMAGE          CREATED          CREATED BY                                      SIZE      COMMENT
+55e107f21dc7   6 minutes ago    CMD ["uvicorn" "app.main:app" "--host" "0.0.…   0B        buildkit.dockerfile.v0
+<missing>      6 minutes ago    ENV PYTHONUNBUFFERED=1                          0B        buildkit.dockerfile.v0
+<missing>      6 minutes ago    USER appuser                                    0B        buildkit.dockerfile.v0
+<missing>      6 minutes ago    HEALTHCHECK &{["CMD-SHELL" "python -c \"impo…   0B        buildkit.dockerfile.v0
+<missing>      6 minutes ago    EXPOSE map[8000/tcp:{}]                         0B        buildkit.dockerfile.v0
+<missing>      6 minutes ago    COPY app ./app # buildkit                       57.3kB    buildkit.dockerfile.v0
+<missing>      6 minutes ago    COPY /usr/local/bin /usr/local/bin # buildkit   31.1MB    buildkit.dockerfile.v0
+<missing>      6 minutes ago    COPY /usr/local/lib/python3.11 /usr/local/li…   207MB     buildkit.dockerfile.v0
+<missing>      6 minutes ago    RUN /bin/sh -c chown -R appuser:appuser /app…   8.19kB    buildkit.dockerfile.v0
+<missing>      15 minutes ago   RUN /bin/sh -c useradd -m -u 10001 appuser #…   69.6kB    buildkit.dockerfile.v0
+<missing>      15 minutes ago   WORKDIR /app                                    8.19kB    buildkit.dockerfile.v0
+<missing>      2 years ago      CMD ["python3"]                                 0B        buildkit.dockerfile.v0
+<missing>      2 years ago      RUN /bin/sh -c set -eux;   savedAptMark="$(a…   13.8MB    buildkit.dockerfile.v0
+<missing>      2 years ago      ENV PYTHON_GET_PIP_SHA256=9cc01665956d22b3bf…   0B        buildkit.dockerfile.v0
+<missing>      2 years ago      ENV PYTHON_GET_PIP_URL=https://github.com/py…   0B        buildkit.dockerfile.v0
+<missing>      2 years ago      ENV PYTHON_SETUPTOOLS_VERSION=65.5.1            0B        buildkit.dockerfile.v0
+<missing>      2 years ago      ENV PYTHON_PIP_VERSION=23.2.1                   0B        buildkit.dockerfile.v0
+<missing>      2 years ago      RUN /bin/sh -c set -eux;  for src in idle3 p…   16.4kB    buildkit.dockerfile.v0
+<missing>      2 years ago      RUN /bin/sh -c set -eux;   savedAptMark="$(a…   41.3MB    buildkit.dockerfile.v0
+<missing>      2 years ago      ENV PYTHON_VERSION=3.11.6                       0B        buildkit.dockerfile.v0
+<missing>      2 years ago      ENV GPG_KEY=A035C8C19219BA821ECEA86B64E628F8…   0B        buildkit.dockerfile.v0
+<missing>      2 years ago      RUN /bin/sh -c set -eux;  apt-get update;  a…   9.48MB    buildkit.dockerfile.v0
+<missing>      2 years ago      ENV LANG=C.UTF-8                                0B        buildkit.dockerfile.v0
+<missing>      2 years ago      ENV PATH=/usr/local/bin:/usr/local/sbin:/usr…   0B        buildkit.dockerfile.v0
+<missing>      2 years ago      /bin/sh -c #(nop)  CMD ["bash"]                 0B        
+<missing>      2 years ago      /bin/sh -c #(nop) ADD file:869c7d0747a17c537…   108MB     

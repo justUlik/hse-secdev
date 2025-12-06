@@ -36,9 +36,9 @@ services:
       start_period: 5s
 
     user: "10001:10001"
-    read_only: true     
+    read_only: true
     cap_drop:
-      - ALL             
+      - ALL
     security_opt:
       - no-new-privileges:true
 

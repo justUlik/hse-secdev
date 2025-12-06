@@ -23,5 +23,5 @@ IMAGE          CREATED          CREATED BY                                      
 <missing>      2 years ago      RUN /bin/sh -c set -eux;  apt-get update;  a…   9.48MB    buildkit.dockerfile.v0
 <missing>      2 years ago      ENV LANG=C.UTF-8                                0B        buildkit.dockerfile.v0
 <missing>      2 years ago      ENV PATH=/usr/local/bin:/usr/local/sbin:/usr…   0B        buildkit.dockerfile.v0
-<missing>      2 years ago      /bin/sh -c #(nop)  CMD ["bash"]                 0B        
-<missing>      2 years ago      /bin/sh -c #(nop) ADD file:869c7d0747a17c537…   108MB     
+<missing>      2 years ago      /bin/sh -c #(nop)  CMD ["bash"]                 0B
+<missing>      2 years ago      /bin/sh -c #(nop) ADD file:869c7d0747a17c537…   108MB

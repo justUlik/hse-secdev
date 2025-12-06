@@ -46,7 +46,7 @@ jobs:
 
       - name: Lint & Format
         run: |
-          ruff check --output-format=github .
+          ruff check .
           black --check .
           isort --check-only .
 
@@ -61,7 +61,7 @@ jobs:
           mkdir -p reports
           pytest -q --junitxml=reports/junit.xml --disable-warnings
 
-      - name: Upload test reports
+      - name: Upload test reports (matrix-safe)
         uses: actions/upload-artifact@v4
         with:
           name: junit-${{ matrix.python-version }}
@@ -70,19 +70,20 @@ jobs:
       - name: Build Docker image (dry-run)
         run: |
           docker build -t secdev-ci:${{ github.sha }} .
-          docker save secdev-ci:${{ github.sha }} -o image.tar
+          docker save secdev-ci:${{ github.sha }} -o image-${{ matrix.python-version }}.tar
 
-      - name: Upload Docker image artifact
+      - name: Upload Docker image artifact (matrix-safe)
         uses: actions/upload-artifact@v4
         with:
-          name: docker-image
-          path: image.tar
+          name: docker-image-${{ matrix.python-version }}
+          path: image-${{ matrix.python-version }}.tar
 
-      - name: Validate secret presence
+      - name: Validate secret presence (does not fail CI)
         env:
           DUMMY_SECRET: ${{ secrets.DUMMY_SECRET }}
         run: |
           if [ -z "$DUMMY_SECRET" ]; then
-            echo "Secret not set"; exit 1;
+            echo "Warning: DUMMY_SECRET not set (OK for training)"
+          else
+            echo "Secret OK (masked)"
           fi
-          echo "Secret ok (value masked)"

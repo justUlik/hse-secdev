@@ -1,0 +1,34 @@
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:41492 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46258 - "GET /health HTTP/1.1" 200 OK
+INFO:     192.168.65.1:35967 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52174 - "GET /health HTTP/1.1" 200 OK
+INFO:     192.168.65.1:57290 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42854 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40494 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55872 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52182 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40396 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60252 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51160 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47148 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42320 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34154 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60536 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49162 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55690 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45986 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44510 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56468 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47318 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33868 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44078 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57230 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37754 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34428 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60302 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53606 - "GET /health HTTP/1.1" 200 OK
+time="2025-12-06T17:03:51+03:00" level=error msg="error waiting for container: unexpected EOF"

@@ -31,16 +31,26 @@ app = FastAPI(title="SecDev Course App", version="0.1.0")
 # --------------------- Logs ----------------------
 
 
-LOG_DIR = os.getenv("APP_LOG_DIR", "/app/logs")
-os.makedirs(LOG_DIR, exist_ok=True)
+# --------------------- Logs ----------------------
 
-for handler in logging.root.handlers[:]:
-    logging.root.removeHandler(handler)
+LOG_DIR = os.getenv("APP_LOG_DIR", "logs")
+
+handlers = [logging.StreamHandler()]
+
+try:
+    os.makedirs(LOG_DIR, exist_ok=True)
+    file_path = os.path.join(LOG_DIR, "app.log")
+    handlers.append(logging.FileHandler(file_path))
+except Exception as exc:
+    print(f"[log-init] Cannot create log file handler: {exc}")
+
+for h in logging.root.handlers[:]:
+    logging.root.removeHandler(h)
 
 logging.basicConfig(
-    filename=os.path.join(LOG_DIR, "app.log"),
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
+    handlers=handlers,
 )
 
 logger = logging.getLogger("secdev")

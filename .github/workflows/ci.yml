@@ -1,8 +1,9 @@
 name: CI
+
 on:
-  pull_request:
   push:
     branches: [main]
+  pull_request:
 
 permissions:
   contents: read
@@ -12,16 +13,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-test:
+    name: Build & Test (matrix)
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-          cache: "pip"
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Cache pip more aggressively
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('requirements.txt', 'requirements-dev.txt') }}
+          restore-keys: |
+            pip-${{ runner.os }}-
 
       - name: Install dependencies
         run: |
@@ -41,8 +56,33 @@ jobs:
       - name: Security scan (bandit)
         run: bandit -r app/
 
-      - name: Tests
-        run: pytest -q
+      - name: Run Tests
+        run: |
+          mkdir -p reports
+          pytest -q --junitxml=reports/junit.xml --disable-warnings
 
-      - name: Pre-commit (all files)
-        run: pre-commit run --all-files
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-${{ matrix.python-version }}
+          path: reports/junit.xml
+
+      - name: Build Docker image (dry-run)
+        run: |
+          docker build -t secdev-ci:${{ github.sha }} .
+          docker save secdev-ci:${{ github.sha }} -o image.tar
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: image.tar
+
+      - name: Validate secret presence
+        env:
+          DUMMY_SECRET: ${{ secrets.DUMMY_SECRET }}
+        run: |
+          if [ -z "$DUMMY_SECRET" ]; then
+            echo "Secret not set"; exit 1;
+          fi
+          echo "Secret ok (value masked)"

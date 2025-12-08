@@ -1,5 +1,6 @@
 import logging
 import os
+from logging import Handler
 from typing import Any, Dict, List
 
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -23,7 +24,7 @@ def get_db():
         db.close()
 
 
-# --------------------- FastAPI app ----------------------
+# --------------------- FastAPI app ---------------------
 
 
 app = FastAPI(title="SecDev Course App", version="0.1.0")
@@ -32,15 +33,23 @@ app = FastAPI(title="SecDev Course App", version="0.1.0")
 
 
 LOG_DIR = os.getenv("APP_LOG_DIR", "logs")
-os.makedirs(LOG_DIR, exist_ok=True)
 
-for handler in logging.root.handlers[:]:
-    logging.root.removeHandler(handler)
+handlers: List[Handler] = [logging.StreamHandler()]
+
+try:
+    os.makedirs(LOG_DIR, exist_ok=True)
+    file_path = os.path.join(LOG_DIR, "app.log")
+    handlers.append(logging.FileHandler(file_path))
+except Exception as exc:
+    print(f"[log-init] Cannot create log file handler: {exc}")
+
+for h in logging.root.handlers[:]:
+    logging.root.removeHandler(h)
 
 logging.basicConfig(
-    filename=os.path.join(LOG_DIR, "app.log"),
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
+    handlers=handlers,
 )
 
 logger = logging.getLogger("secdev")

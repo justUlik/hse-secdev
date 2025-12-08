@@ -29,13 +29,13 @@ jobs:
 
       - name: Generate SBOM (Syft CycloneDX)
         run: |
-          docker run --rm -v "$PWD":/work -w /work anchore/syft:0.105.0 \
+          docker run --rm -v "$PWD":/work -w /work anchore/syft:latest \
             packages dir:. -o cyclonedx-json > EVIDENCE/P09/sbom.json
 
       - name: SCA Scan (Grype)
         run: |
           set -e
-          docker run --rm -v "$PWD":/work -w /work anchore/grype:0.77.0 \
+          docker run --rm -v "$PWD":/work -w /work anchore/grype:latest \
             sbom:/work/EVIDENCE/P09/sbom.json -o json > EVIDENCE/P09/sca_report.json
 
       - name: Build SCA summary
@@ -62,15 +62,13 @@ jobs:
             echo '```'
             echo
             echo "Automated interpretation:"
-            echo
             echo "- Critical: $CRITICAL"
             echo "- High: $HIGH"
             echo "- Medium: $MEDIUM"
             echo "- Low: $LOW"
             echo
-            echo "Most findings come from transitive dependencies (фреймворки, инструменты разработки)."
-            echo "План: критичные и high-серьёзности рассматривать в первую очередь — либо обновлять зависимости,"
-            echo "либо оформлять временные waivers в policy/waivers.yml с пересмотром в будущем релизе."
+            echo "Most findings come from transitive dependencies."
+            echo "План: критичные/High — обновлять или оформлять waivers в policy/waivers.yml."
           } > EVIDENCE/P09/sca_summary.md
 
       - name: Check High/Critical count (soft)

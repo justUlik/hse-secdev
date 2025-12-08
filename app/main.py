@@ -1,10 +1,19 @@
-from fastapi import FastAPI, HTTPException, Request, Depends
+import logging
+import os
+from typing import Any, Dict, List
+
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-from app.database import Base, engine, SessionLocal
-from app.models import Recipe
 from sqlalchemy.orm import Session
 
+from app.database import Base, SessionLocal, engine
+from app.models import Recipe
+
 Base.metadata.create_all(bind=engine)
+
+
+# --------------------- DB Session ---------------------
+
 
 def get_db():
     db = SessionLocal()
@@ -13,7 +22,30 @@ def get_db():
     finally:
         db.close()
 
+
+# --------------------- FastAPI app ----------------------
+
+
 app = FastAPI(title="SecDev Course App", version="0.1.0")
+
+# --------------------- Logs ----------------------
+
+
+LOG_DIR = os.getenv("APP_LOG_DIR", "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+
+logging.basicConfig(
+    filename=os.path.join(LOG_DIR, "app.log"),
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+)
+
+logger = logging.getLogger("secdev")
+
+# --------------------- ERROR HANDLING ----------------------
 
 
 class ApiError(Exception):
@@ -25,6 +57,7 @@ class ApiError(Exception):
 
 @app.exception_handler(ApiError)
 async def api_error_handler(request: Request, exc: ApiError):
+    logger.warning(f"API error: code={exc.code} path={request.url.path}")
     return JSONResponse(
         status_code=exc.status,
         content={"error": {"code": exc.code, "message": exc.message}},
@@ -46,16 +79,41 @@ def health():
     return {"status": "ok"}
 
 
-# Example minimal entity (for tests/demo)
-_DB = {"items": []}
+# --------------------- SECURITY HEADERS (S06-06) ----------------------
+
+
+@app.middleware("http")
+async def log_and_secure(request: Request, call_next):
+    try:
+        response = await call_next(request)
+    except ApiError as exc:
+        logger.warning(f"API error: code={exc.code} path={request.url.path}")
+        response = JSONResponse(
+            status_code=exc.status,
+            content={"error": {"code": exc.code, "message": exc.message}},
+        )
+
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Content-Security-Policy"] = "default-src 'self'"
+    logger.info(
+        f"request method={request.method} path={request.url.path} status={response.status_code}"
+    )
+
+    return response
+
+
+# --------------------- DEMO /items API (как было) ----------------------
+
+
+_DB: Dict[str, List[Dict[str, Any]]] = {"items": []}
 
 
 @app.post("/items")
 def create_item(name: str):
     if not name or len(name) > 100:
-        raise ApiError(
-            code="validation_error", message="name must be 1..100 chars", status=422
-        )
+        raise ApiError(code="validation_error", message="name must be 1..100 chars", status=422)
     item = {"id": len(_DB["items"]) + 1, "name": name}
     _DB["items"].append(item)
     return item
@@ -69,27 +127,39 @@ def get_item(item_id: int):
     raise ApiError(code="not_found", message="item not found", status=404)
 
 
-# In-memory recipes DB
-_RECIPES_DB = []
+# --------------------- STRONG VALIDATION FOR RECIPES (S06-04) ----------------------
 
 
-# Helper for recipe validation
-def _validate_recipe(data):
-    title = data.get("title", "")
-    description = data.get("description", "")
-    if not isinstance(title, str) or not title.strip():
-        raise ApiError(
-            code="validation_error", message="Title must not be empty", status=422
-        )
-    if not isinstance(description, str) or len(description) > 500:
-        raise ApiError(
-            code="validation_error",
-            message="Description must be less than 500 chars",
-            status=422,
-        )
+def _validate_recipe(data: dict):
+    title = data.get("title")
+    description = data.get("description")
+    ingredients = data.get("ingredients")
+    instructions = data.get("instructions", "")
+
+    # title: 1..120
+    if not isinstance(title, str) or not (1 <= len(title) <= 120):
+        raise ApiError("validation_error", "Invalid title length", 422)
+
+    # description: 1..2000
+    if not isinstance(description, str) or not (1 <= len(description) <= 2000):
+        raise ApiError("validation_error", "Invalid description length", 422)
+
+    # ingredients: non-empty list of short strings
+    if not isinstance(ingredients, list) or len(ingredients) == 0:
+        raise ApiError("validation_error", "Ingredients must be a non-empty list", 422)
+
+    for entry in ingredients:
+        if not isinstance(entry, str) or not (1 <= len(entry) <= 200):
+            raise ApiError("validation_error", "Invalid ingredient entry", 422)
+
+    # instructions: optional, ≤ 5000 chars
+    if not isinstance(instructions, str) or len(instructions) > 5000:
+        raise ApiError("validation_error", "Instructions too long", 422)
 
 
-# 1. GET /recipes - list all recipes
+# --------------------- RECIPES CRUD (через SQLAlchemy) ----------------------
+
+
 @app.get("/recipes")
 def list_recipes(db: Session = Depends(get_db)):
     recipes = db.query(Recipe).all()
@@ -105,7 +175,6 @@ def list_recipes(db: Session = Depends(get_db)):
     ]
 
 
-# 2. GET /recipes/{recipe_id} - get one recipe by id
 @app.get("/recipes/{recipe_id}")
 def get_recipe(recipe_id: int, db: Session = Depends(get_db)):
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
@@ -121,23 +190,14 @@ def get_recipe(recipe_id: int, db: Session = Depends(get_db)):
     }
 
 
-# 3. POST /recipes - create recipe
 @app.post("/recipes")
 def create_recipe(recipe: dict, db: Session = Depends(get_db)):
     _validate_recipe(recipe)
 
-    ingredients = recipe.get("ingredients", [])
-    if not isinstance(ingredients, list):
-        raise ApiError(
-            code="validation_error",
-            message="Ingredients must be a list",
-            status=422,
-        )
-
     db_recipe = Recipe(
         title=recipe["title"],
         description=recipe["description"],
-        ingredients="||".join(ingredients),
+        ingredients="||".join(recipe["ingredients"]),
         instructions=recipe.get("instructions", "") or "",
     )
     db.add(db_recipe)
@@ -148,23 +208,14 @@ def create_recipe(recipe: dict, db: Session = Depends(get_db)):
         "id": db_recipe.id,
         "title": db_recipe.title,
         "description": db_recipe.description,
-        "ingredients": ingredients,
+        "ingredients": recipe["ingredients"],
         "instructions": db_recipe.instructions,
     }
 
 
-# 4. PUT /recipes/{recipe_id} - update recipe
 @app.put("/recipes/{recipe_id}")
 def update_recipe(recipe_id: int, recipe: dict, db: Session = Depends(get_db)):
     _validate_recipe(recipe)
-
-    ingredients = recipe.get("ingredients", [])
-    if not isinstance(ingredients, list):
-        raise ApiError(
-            code="validation_error",
-            message="Ingredients must be a list",
-            status=422,
-        )
 
     db_recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
     if not db_recipe:
@@ -172,8 +223,8 @@ def update_recipe(recipe_id: int, recipe: dict, db: Session = Depends(get_db)):
 
     db_recipe.title = recipe["title"]
     db_recipe.description = recipe["description"]
-    db_recipe.ingredients = "||".join(ingredients)
-    db_recipe.instructions = recipe.get("instructions", "") or ""
+    db_recipe.ingredients = "||".join(recipe["ingredients"])  # type: ignore[assignment]
+    db_recipe.instructions = recipe.get("instructions", "") or ""  # type: ignore[assignment]
 
     db.commit()
     db.refresh(db_recipe)
@@ -182,12 +233,11 @@ def update_recipe(recipe_id: int, recipe: dict, db: Session = Depends(get_db)):
         "id": db_recipe.id,
         "title": db_recipe.title,
         "description": db_recipe.description,
-        "ingredients": ingredients,
+        "ingredients": recipe["ingredients"],
         "instructions": db_recipe.instructions,
     }
 
 
-# 5. DELETE /recipes/{recipe_id} - delete recipe
 @app.delete("/recipes/{recipe_id}")
 def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
     db_recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()

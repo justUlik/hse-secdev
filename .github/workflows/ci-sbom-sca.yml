@@ -37,17 +37,16 @@ jobs:
           set -e
           docker run --rm -v "$PWD":/work -w /work anchore/grype:0.77.0 \
             sbom:/work/EVIDENCE/P09/sbom.json -o json > EVIDENCE/P09/sca_report.json
-            - name: Build SCA summary
+
+      - name: Build SCA summary
         run: |
           mkdir -p EVIDENCE/P09
 
-          # Посчитаем количество уязвимостей по severity в виде JSON
-          SEVERITY_JSON=$(jq '[.matches[].vulnerability.severity] 
-            | group_by(.) 
-            | map({(.[0]): length}) 
+          SEVERITY_JSON=$(jq '[.matches[].vulnerability.severity]
+            | group_by(.)
+            | map({(.[0]): length})
             | add // {}' EVIDENCE/P09/sca_report.json)
 
-          # Достанем отдельные значения (если нет — подставим 0)
           CRITICAL=$(echo "$SEVERITY_JSON" | jq '.Critical // 0')
           HIGH=$(echo "$SEVERITY_JSON" | jq '.High // 0')
           MEDIUM=$(echo "$SEVERITY_JSON" | jq '.Medium // 0')
@@ -76,7 +75,9 @@ jobs:
 
       - name: Check High/Critical count (soft)
         run: |
-          high_count=$(jq '[.matches[].vulnerability.severity] | map(select(.=="High" or .=="Critical")) | length' EVIDENCE/P09/sca_report.json || echo 0)
+          high_count=$(jq '[.matches[].vulnerability.severity]
+            | map(select(.=="High" or .=="Critical"))
+            | length' EVIDENCE/P09/sca_report.json || echo 0)
           echo "High/Critical vulnerabilities: $high_count"
 
       - name: Upload SBOM & SCA evidence

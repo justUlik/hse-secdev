@@ -1,11 +1,16 @@
-title = "gitleaks config for course project"
+title = "course default gitleaks config"
+
+[extend]
 
 [allowlist]
-description = "allowlist for false positives"
+description = "ignore non-sensitive patterns and development secrets"
+
 paths = [
-  "EVIDENCE/",   
+  "EVIDENCE/", 
 ]
 
 regexes = [
-  '''TEST_SECRET_DO_NOT_USE''',
+  '''DUMMY_SECRET''',
 ]
+
+commits = []

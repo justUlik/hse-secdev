@@ -1,0 +1,16 @@
+title = "course default gitleaks config"
+
+[extend]
+
+[allowlist]
+description = "ignore non-sensitive patterns and development secrets"
+
+paths = [
+  "EVIDENCE/", 
+]
+
+regexes = [
+  '''DUMMY_SECRET''',
+]
+
+commits = []

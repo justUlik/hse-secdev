@@ -1,0 +1,11 @@
+title = "gitleaks config for course project"
+
+[allowlist]
+description = "allowlist for false positives"
+paths = [
+  "EVIDENCE/",   
+]
+
+regexes = [
+  '''TEST_SECRET_DO_NOT_USE''',
+]

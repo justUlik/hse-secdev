@@ -21,6 +21,13 @@ jobs:
         uses: actions/checkout@v4
 
       # -----------------------
+      # Prepare evidence directory
+      # -----------------------
+      - name: Prepare evidence directory
+        run: |
+          mkdir -p EVIDENCE/P12
+
+      # -----------------------
       # Build image
       # -----------------------
       - name: Build Docker image

@@ -50,9 +50,9 @@ jobs:
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
               -t http://localhost:8000/debug/xss \
+              -a \
               -r /zap/wrk/EVIDENCE/P11/zap_baseline.html \
               -J /zap/wrk/EVIDENCE/P11/zap_baseline.json \
-              -a \
               -d || true
 
           ls -la EVIDENCE/P11

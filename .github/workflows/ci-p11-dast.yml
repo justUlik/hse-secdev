@@ -52,7 +52,7 @@ jobs:
             bash -c "
               mkdir -p EVIDENCE/P11 &&
               zap-baseline.py \
-                -t http://localhost:8000/debug/xss \
+                -t http://localhost:8000 \
                 -a \
                 -r EVIDENCE/P11/zap_baseline.html \
                 -J EVIDENCE/P11/zap_baseline.json \

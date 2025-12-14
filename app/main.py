@@ -34,12 +34,8 @@ ENABLE_DAST_DEMO = os.getenv("ENABLE_DAST_DEMO", "false").lower() == "true"
 if ENABLE_DAST_DEMO:
 
     @app.get("/debug/xss", response_class=HTMLResponse)
-    def debug_xss():
-        """
-        Intentionally unsafe endpoint for ZAP baseline demo.
-        Always returns inline script to trigger passive XSS rule.
-        """
-        return "<html><body><script>alert('zap')</script></body></html>"
+    def debug_xss(q: str = Query("")):
+        return f"<html><body>{q}</body></html>"
 
 # --------------------- Logs ----------------------
 

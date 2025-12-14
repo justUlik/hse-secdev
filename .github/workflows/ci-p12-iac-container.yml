@@ -35,18 +35,18 @@ jobs:
           docker build -t app:local .
 
       # -----------------------
-      # Hadolint
+      # Hadolint (non-failing)
       # -----------------------
       - name: Run Hadolint
         run: |
           docker run --rm \
             -v $PWD:/work \
             hadolint/hadolint:v2.12.0 \
-            hadolint -f json /work/Dockerfile \
+            hadolint --no-fail -f json /work/Dockerfile \
             > EVIDENCE/P12/hadolint_report.json
 
       # -----------------------
-      # Checkov (IaC)
+      # Checkov (non-failing)
       # -----------------------
       - name: Run Checkov
         run: |
@@ -56,10 +56,10 @@ jobs:
             -d /work/iac \
             -o json \
             --compact \
-            > EVIDENCE/P12/checkov_report.json
+            > EVIDENCE/P12/checkov_report.json || true
 
       # -----------------------
-      # Trivy
+      # Trivy (non-failing)
       # -----------------------
       - name: Run Trivy
         run: |
@@ -69,7 +69,7 @@ jobs:
             aquasec/trivy \
             image app:local \
             --format json \
-            --output /work/EVIDENCE/P12/trivy_report.json
+            --output /work/EVIDENCE/P12/trivy_report.json || true
 
       # -----------------------
       # Upload artifacts

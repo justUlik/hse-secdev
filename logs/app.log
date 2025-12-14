@@ -48,3 +48,12 @@
 2025-12-06 17:58:58,315 INFO HTTP Request: POST http://testserver/items?name= "HTTP/1.1 422 Unprocessable Entity"
 2025-12-06 17:58:58,318 INFO request method=GET path=/health status=200
 2025-12-06 17:58:58,319 INFO HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2025-12-14 16:11:12,354 INFO request method=GET path=/debug/echo status=200
+2025-12-14 16:31:30,655 INFO request method=GET path=/debug/echo status=404
+2025-12-14 16:33:16,891 INFO request method=GET path=/debug/echo status=404
+2025-12-14 16:33:58,088 INFO request method=GET path=/docs status=200
+2025-12-14 16:34:02,488 INFO request method=GET path=/openapi.json status=200
+2025-12-14 16:34:02,489 INFO request method=GET path=/apple-touch-icon-precomposed.png status=404
+2025-12-14 16:34:02,490 INFO request method=GET path=/apple-touch-icon.png status=404
+2025-12-14 16:35:11,474 INFO request method=GET path=/debug/xss status=200
+2025-12-14 16:51:09,069 INFO request method=GET path=/debug/xss status=200

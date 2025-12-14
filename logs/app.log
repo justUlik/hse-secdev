@@ -56,3 +56,4 @@
 2025-12-14 16:34:02,489 INFO request method=GET path=/apple-touch-icon-precomposed.png status=404
 2025-12-14 16:34:02,490 INFO request method=GET path=/apple-touch-icon.png status=404
 2025-12-14 16:35:11,474 INFO request method=GET path=/debug/xss status=200
+2025-12-14 16:51:09,069 INFO request method=GET path=/debug/xss status=200

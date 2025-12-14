@@ -53,15 +53,12 @@ jobs:
             -v "$PWD":/zap/wrk \
             owasp/zap2docker-stable \
             zap-baseline.py \
-              -t http://localhost:8000 \
+              -t "http://localhost:8000/debug/echo?q=test" \
               -r zap_baseline.html \
               -J zap_baseline.json \
               -d || true
 
-          # если ZAP создал файлы — заменяем placeholders
-          [ -f zap_baseline.html ] && mv zap_baseline.html EVIDENCE/P11/
-          [ -f zap_baseline.json ] && mv zap_baseline.json EVIDENCE/P11/
-
+          mv zap_baseline.* EVIDENCE/P11/ || true
           ls -la EVIDENCE/P11
 
       - name: Upload DAST evidence

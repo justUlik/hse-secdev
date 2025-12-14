@@ -114,10 +114,11 @@ async def log_and_secure(request: Request, call_next):
             content={"error": {"code": exc.code, "message": exc.message}},
         )
 
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["Referrer-Policy"] = "no-referrer"
-    response.headers["Content-Security-Policy"] = "default-src 'self'"
+    if not ENABLE_DAST_DEMO:
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        response.headers["Content-Security-Policy"] = "default-src 'self'"
     logger.info(
         f"request method={request.method} path={request.url.path} status={response.status_code}"
     )

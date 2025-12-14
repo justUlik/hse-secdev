@@ -6,7 +6,7 @@ title = "course default gitleaks config"
 description = "ignore non-sensitive patterns and development secrets"
 
 paths = [
-  "EVIDENCE/", 
+  "EVIDENCE/",
 ]
 
 regexes = [

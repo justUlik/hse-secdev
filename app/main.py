@@ -3,8 +3,8 @@ import os
 from logging import Handler
 from typing import Any, Dict, List
 
-from fastapi import Depends, FastAPI, HTTPException, Request, Query
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 
 from app.database import Base, SessionLocal, engine
@@ -36,6 +36,7 @@ if ENABLE_DAST_DEMO:
     @app.get("/debug/xss", response_class=HTMLResponse)
     def debug_xss(q: str = Query("")):
         return f"<html><body>{q}</body></html>"
+
 
 # --------------------- Logs ----------------------
 

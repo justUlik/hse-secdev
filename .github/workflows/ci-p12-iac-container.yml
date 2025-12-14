@@ -41,7 +41,7 @@ jobs:
         run: |
           docker run --rm \
             -v $PWD:/work \
-            hadolint/hadolint \
+            hadolint/hadolint:v2.12.0 \
             hadolint -f json /work/Dockerfile \
             > EVIDENCE/P12/hadolint_report.json
 

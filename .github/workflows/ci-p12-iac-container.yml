@@ -42,7 +42,9 @@ jobs:
           docker run --rm \
             -v $PWD:/work \
             hadolint/hadolint:v2.12.0 \
-            hadolint --no-fail -f json /work/Dockerfile \
+            hadolint --no-fail \
+              --config /work/security/hadolint.yaml \
+              -f json /work/Dockerfile \
             > EVIDENCE/P12/hadolint_report.json
 
       # -----------------------
@@ -54,6 +56,7 @@ jobs:
             -v $PWD:/work \
             bridgecrew/checkov \
             -d /work/iac \
+            -c /work/security/checkov.yaml \
             -o json \
             --compact \
             > EVIDENCE/P12/checkov_report.json || true

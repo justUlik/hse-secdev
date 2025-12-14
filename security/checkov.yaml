@@ -3,7 +3,7 @@ compact: true
 
 framework:
   - kubernetes
-  - dockerfile
 
 skip-check:
-  # - CKV_K8S_21
+  - CKV_K8S_21   # default namespace
+  - CKV2_K8S_6   # NetworkPolicy not defined

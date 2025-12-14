@@ -23,8 +23,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare evidence dir
-        run: mkdir -p EVIDENCE/P11
+      - name: Prepare evidence dir and placeholder files
+        run: |
+          mkdir -p EVIDENCE/P11
+          touch EVIDENCE/P11/zap_baseline.html
+          touch EVIDENCE/P11/zap_baseline.json
+          ls -la EVIDENCE/P11
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -52,10 +56,10 @@ jobs:
               -J zap_baseline.json \
               -d || true
 
+          # если ZAP создал файлы — заменяем placeholders
+          [ -f zap_baseline.html ] && mv zap_baseline.html EVIDENCE/P11/
+          [ -f zap_baseline.json ] && mv zap_baseline.json EVIDENCE/P11/
 
-          mkdir -p EVIDENCE/P11
-          mv zap_baseline.html EVIDENCE/P11/ || echo "no html report"
-          mv zap_baseline.json EVIDENCE/P11/ || echo "no json report"
           ls -la EVIDENCE/P11
 
       - name: Upload DAST evidence

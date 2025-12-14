@@ -11,18 +11,8 @@ from app.database import Base, SessionLocal, engine
 from app.models import Recipe
 
 Base.metadata.create_all(bind=engine)
-ENABLE_DAST_DEMO = os.getenv("ENABLE_DAST_DEMO", "false").lower() == "true"
 
-if ENABLE_DAST_DEMO:
 
-    @app.get("/debug/echo", response_class=HTMLResponse)
-    def debug_echo(q: str = Query("")):
-        """
-        Intentionally unsafe endpoint for DAST (OWASP ZAP) testing.
-        Enabled only when ENABLE_DAST_DEMO=true.
-        """
-        return f"<html><body>User input: {q}</body></html>"
-        
 # --------------------- DB Session ---------------------
 
 
@@ -38,6 +28,18 @@ def get_db():
 
 
 app = FastAPI(title="SecDev Course App", version="0.1.0")
+
+ENABLE_DAST_DEMO = os.getenv("ENABLE_DAST_DEMO", "false").lower() == "true"
+
+if ENABLE_DAST_DEMO:
+
+    @app.get("/debug/echo", response_class=HTMLResponse)
+    def debug_echo(q: str = Query("")):
+        """
+        Intentionally unsafe endpoint for DAST (OWASP ZAP) testing.
+        Enabled only when ENABLE_DAST_DEMO=true.
+        """
+        return f"<html><body>User input: {q}</body></html>"
 
 # --------------------- Logs ----------------------
 

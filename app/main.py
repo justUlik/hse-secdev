@@ -3,16 +3,26 @@ import os
 from logging import Handler
 from typing import Any, Dict, List
 
-from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi import Depends, FastAPI, HTTPException, Request, Query
+from fastapi.responses import JSONResponse, HTMLResponse
 from sqlalchemy.orm import Session
 
 from app.database import Base, SessionLocal, engine
 from app.models import Recipe
 
 Base.metadata.create_all(bind=engine)
+ENABLE_DAST_DEMO = os.getenv("ENABLE_DAST_DEMO", "false").lower() == "true"
 
+if ENABLE_DAST_DEMO:
 
+    @app.get("/debug/echo", response_class=HTMLResponse)
+    def debug_echo(q: str = Query("")):
+        """
+        Intentionally unsafe endpoint for DAST (OWASP ZAP) testing.
+        Enabled only when ENABLE_DAST_DEMO=true.
+        """
+        return f"<html><body>User input: {q}</body></html>"
+        
 # --------------------- DB Session ---------------------
 
 

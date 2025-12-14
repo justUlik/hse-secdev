@@ -43,18 +43,19 @@ jobs:
 
       - name: ZAP baseline scan
         run: |
-          mkdir -p EVIDENCE/P11
-
           docker run --rm --network host \
             -v "$PWD":/zap/wrk \
-            -w /zap/wrk \
             owasp/zap2docker-stable \
             zap-baseline.py \
               -t http://localhost:8000 \
-              -r EVIDENCE/P11/zap_baseline.html \
-              -J EVIDENCE/P11/zap_baseline.json \
+              -r zap_baseline.html \
+              -J zap_baseline.json \
               -d || true
 
+
+          mkdir -p EVIDENCE/P11
+          mv zap_baseline.html EVIDENCE/P11/ || echo "no html report"
+          mv zap_baseline.json EVIDENCE/P11/ || echo "no json report"
           ls -la EVIDENCE/P11
 
       - name: Upload DAST evidence
@@ -62,5 +63,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: P11_EVIDENCE
-          path: EVIDENCE/P11/**
-          if-no-files-found: error
+          path: EVIDENCE/P11

@@ -23,12 +23,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare evidence dir and placeholder files
-        run: |
-          mkdir -p EVIDENCE/P11
-          touch EVIDENCE/P11/zap_baseline.html
-          touch EVIDENCE/P11/zap_baseline.json
-          ls -la EVIDENCE/P11
+      - name: Prepare evidence dir
+        run: mkdir -p EVIDENCE/P11
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -51,14 +47,14 @@ jobs:
         run: |
           docker run --rm --network host \
             -v "$PWD":/zap/wrk \
-            owasp/zap2docker-stable \
+            ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
-              -t "http://localhost:8000/debug/echo?q=test" \
-              -r zap_baseline.html \
-              -J zap_baseline.json \
+              -t http://localhost:8000/debug/xss \
+              -r /zap/wrk/EVIDENCE/P11/zap_baseline.html \
+              -J /zap/wrk/EVIDENCE/P11/zap_baseline.json \
+              -a \
               -d || true
 
-          mv zap_baseline.* EVIDENCE/P11/ || true
           ls -la EVIDENCE/P11
 
       - name: Upload DAST evidence

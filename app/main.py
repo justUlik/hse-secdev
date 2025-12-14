@@ -33,13 +33,13 @@ ENABLE_DAST_DEMO = os.getenv("ENABLE_DAST_DEMO", "false").lower() == "true"
 
 if ENABLE_DAST_DEMO:
 
-    @app.get("/debug/echo", response_class=HTMLResponse)
-    def debug_echo(q: str = Query("")):
+    @app.get("/debug/xss", response_class=HTMLResponse)
+    def debug_xss():
         """
-        Intentionally unsafe endpoint for DAST (OWASP ZAP) testing.
-        Enabled only when ENABLE_DAST_DEMO=true.
+        Intentionally unsafe endpoint for ZAP baseline demo.
+        Always returns inline script to trigger passive XSS rule.
         """
-        return f"<html><body>User input: {q}</body></html>"
+        return "<html><body><script>alert('zap')</script></body></html>"
 
 # --------------------- Logs ----------------------
 

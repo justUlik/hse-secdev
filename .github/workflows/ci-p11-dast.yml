@@ -46,19 +46,19 @@ jobs:
       - name: ZAP baseline scan
         run: |
           docker run --rm --network host \
+            -u 0 \
             -v "$PWD":/zap/wrk \
             -w /zap/wrk \
             ghcr.io/zaproxy/zaproxy:stable \
-            bash -c "
-              mkdir -p EVIDENCE/P11 &&
-              zap-baseline.py \
-                -t http://localhost:8000 \
-                -a \
-                -r EVIDENCE/P11/zap_baseline.html \
-                -J EVIDENCE/P11/zap_baseline.json \
-                -d || true
-            "
+            zap-baseline.py \
+              -t http://localhost:8000/debug/xss \
+              -a \
+              -d \
+              -z "-config api.disablekey=true -config logger.level=DEBUG" \
+              -r EVIDENCE/P11/zap_baseline.html \
+              -J EVIDENCE/P11/zap_baseline.json || true
 
+          echo "=== EVIDENCE ==="
           ls -la EVIDENCE/P11
 
       - name: Upload DAST evidence

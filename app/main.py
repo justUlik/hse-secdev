@@ -3,8 +3,8 @@ import os
 from logging import Handler
 from typing import Any, Dict, List
 
-from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 
 from app.database import Base, SessionLocal, engine
@@ -28,6 +28,15 @@ def get_db():
 
 
 app = FastAPI(title="SecDev Course App", version="0.1.0")
+
+ENABLE_DAST_DEMO = os.getenv("ENABLE_DAST_DEMO", "false").lower() == "true"
+
+if ENABLE_DAST_DEMO:
+
+    @app.get("/debug/xss", response_class=HTMLResponse)
+    def debug_xss(q: str = Query("")):
+        return f"<html><body>{q}</body></html>"
+
 
 # --------------------- Logs ----------------------
 
@@ -102,10 +111,14 @@ async def log_and_secure(request: Request, call_next):
             content={"error": {"code": exc.code, "message": exc.message}},
         )
 
+    if ENABLE_DAST_DEMO:
+        response.headers["Content-Security-Policy"] = "default-src 'self' 'unsafe-inline'"
+    else:
+        response.headers["Content-Security-Policy"] = "default-src 'self'"
+
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "no-referrer"
-    response.headers["Content-Security-Policy"] = "default-src 'self'"
     logger.info(
         f"request method={request.method} path={request.url.path} status={response.status_code}"
     )

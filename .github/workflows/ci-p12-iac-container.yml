@@ -1,0 +1,84 @@
+name: Security - IaC & Container (P12)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - Dockerfile
+      - iac/**
+      - security/**
+      - .github/workflows/ci-p12-iac-container.yml
+
+jobs:
+  p12-security:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: p12-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # -----------------------
+      # Prepare evidence directory
+      # -----------------------
+      - name: Prepare evidence directory
+        run: |
+          mkdir -p EVIDENCE/P12
+
+      # -----------------------
+      # Build image
+      # -----------------------
+      - name: Build Docker image
+        run: |
+          docker build -t app:local .
+
+      # -----------------------
+      # Hadolint (non-failing)
+      # -----------------------
+      - name: Run Hadolint
+        run: |
+          docker run --rm \
+            -v $PWD:/work \
+            hadolint/hadolint:v2.12.0 \
+            hadolint --no-fail \
+              --config /work/security/hadolint.yaml \
+              -f json /work/Dockerfile \
+            > EVIDENCE/P12/hadolint_report.json
+
+      # -----------------------
+      # Checkov (non-failing)
+      # -----------------------
+      - name: Run Checkov
+        run: |
+          docker run --rm \
+            -v $PWD:/work \
+            bridgecrew/checkov \
+            -d /work/iac \
+            -c /work/security/checkov.yaml \
+            -o json \
+            --compact \
+            > EVIDENCE/P12/checkov_report.json || true
+
+      # -----------------------
+      # Trivy (non-failing)
+      # -----------------------
+      - name: Run Trivy
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v $PWD:/work \
+            aquasec/trivy \
+            image app:local \
+            --format json \
+            --output /work/EVIDENCE/P12/trivy_report.json || true
+
+      # -----------------------
+      # Upload artifacts
+      # -----------------------
+      - name: Upload P12 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: P12_EVIDENCE
+          path: EVIDENCE/P12/
